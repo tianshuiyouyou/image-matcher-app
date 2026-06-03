@@ -15,30 +15,29 @@ jobs:
         with:
           flutter-version: '3.19.0'
 
-      - name: Create new Flutter project and migrate code
+      - name: Prepare build environment
         run: |
-          # 创建临时文件夹
-          mkdir temp_project
-          cd temp_project
-          # 生成全新的 Flutter 项目
-          flutter create -t app .
-          # 删除新项目中的默认 lib 和 pubspec.yaml
-          rm -rf lib pubspec.yaml
-          # 复制你的代码（来自原仓库的 image_matcher_app 子文件夹）
-          cp -r ../image_matcher_app/lib .
-          cp ../image_matcher_app/pubspec.yaml .
-          # 回到上级目录
-          cd ..
-          # 将 temp_project 整个移动到原仓库根目录（覆盖原 image_matcher_app）
-          rm -rf image_matcher_app
-          mv temp_project image_matcher_app
-          cd image_matcher_app
+          # 创建临时项目
+          cd /tmp
+          flutter create -t app temp_project
+          # 进入你的代码仓库
+          cd $GITHUB_WORKSPACE/image_matcher_app
+          # 复制临时项目的 android 文件夹
+          cp -r /tmp/temp_project/android .
+          # 复制临时项目的 gradle 相关文件
+          cp /tmp/temp_project/gradle.properties .
+          cp /tmp/temp_project/settings.gradle .
+          cp /tmp/temp_project/gradle/wrapper/gradle-wrapper.jar gradle/wrapper/
+          cp /tmp/temp_project/gradle/wrapper/gradle-wrapper.properties gradle/wrapper/
+          # 清理可能冲突的缓存
+          rm -rf .gradle
+          # 获取依赖
           flutter pub get
 
       - name: Build APK
         run: |
-          cd image_matcher_app
-          flutter build apk --release
+          cd $GITHUB_WORKSPACE/image_matcher_app
+          flutter build apk --release --verbose
 
       - uses: actions/upload-artifact@v4
         with:
