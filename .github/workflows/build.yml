@@ -15,29 +15,17 @@ jobs:
         with:
           flutter-version: '3.19.0'
 
-      - name: Prepare build environment
+      - name: Setup Android project
         run: |
-          # 创建临时项目
-          cd /tmp
-          flutter create -t app temp_project
-          # 进入你的代码仓库
-          cd $GITHUB_WORKSPACE/image_matcher_app
-          # 复制临时项目的 android 文件夹
-          cp -r /tmp/temp_project/android .
-          # 复制临时项目的 gradle 相关文件
-          cp /tmp/temp_project/gradle.properties .
-          cp /tmp/temp_project/settings.gradle .
-          cp /tmp/temp_project/gradle/wrapper/gradle-wrapper.jar gradle/wrapper/
-          cp /tmp/temp_project/gradle/wrapper/gradle-wrapper.properties gradle/wrapper/
-          # 清理可能冲突的缓存
-          rm -rf .gradle
-          # 获取依赖
+          cd image_matcher_app
+          # 自动输入 n 以避免覆盖已有的 lib 和 pubspec.yaml
+          echo n | flutter create --platforms=android .
           flutter pub get
 
       - name: Build APK
         run: |
-          cd $GITHUB_WORKSPACE/image_matcher_app
-          flutter build apk --release --verbose
+          cd image_matcher_app
+          flutter build apk --release
 
       - uses: actions/upload-artifact@v4
         with:
